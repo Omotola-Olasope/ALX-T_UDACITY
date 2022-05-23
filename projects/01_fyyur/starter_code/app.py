@@ -38,13 +38,13 @@ class Venue(db.Model):
     state = db.Column(db.String(120), nullable=False)
     address = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(120), nullable=False)
-    image_link = db.Column(db.String(500), nullable=False)
-    facebook_link = db.Column(db.String(120), nullable=False)
-    shows = db.relationship('Show', backref='venue', lazy=True)
     genres = db.Column(db.String(), nullable=True)
+    facebook_link = db.Column(db.String(120), nullable=False)
+    image_link = db.Column(db.String(500), nullable=False)
     website = db.Column(db.String(), nullable=True)
     seeking_talent = db.Column(db.Boolean)
-    seeking_describtion = db.Column(db.String())
+    seeking_describtion = db.Column(db.Text())
+    shows = db.relationship('Show', backref='venue', lazy=True)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -57,12 +57,12 @@ class Artist(db.Model):
     state = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(120), nullable=False)
     genres = db.Column(db.String(120), nullable=False)
-    image_link = db.Column(db.String(500), nullable=False)
     facebook_link = db.Column(db.String(120), nullable=False)
-    shows = db.relationship('Show', backref='artist', lazy=True)
+    image_link = db.Column(db.String(500), nullable=False)
     website = db.Column(db.String(), nullable=True)
     seeking_venue = db.Column(db.Boolean)
-    seeking_describtion = db.Column(db.String())
+    seeking_describtion = db.Column(db.Text())
+    shows = db.relationship('Show', backref='artist', lazy=True)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -72,10 +72,9 @@ class Show(db.Model):
     __tablename__ = 'Show'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), nullable=False)
     artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
     venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
-    date_time = db.Column(db.DateTime, nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
 
 
 #----------------------------------------------------------------------------#
@@ -240,12 +239,36 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
+  try:
+    new_venue_name = request.form['name']
+    new_venue_city = request.form['city']
+    new_venue_state = request.form['state']
+    new_venue_address = request.form['address']
+    new_venue_phone = request.form['phone']
+    new_venue_genres = request.form['genres']
+    new_venue_facebook_link = request.form['facebook_link']
+    new_venue_image_link = request.form['image_link']
+    new_venue_website = request.form['website']
+    new_venue_seekingTalent = request.form['seeking_talent']
+    new_venue_seekingDescription = request.form['seeking_description']
+    new_venue = Venue(new_venue_name, new_venue_city, new_venue_state, new_venue_address, new_venue_phone, new_venue_genres, new_venue_facebook_link, new_venue_image_link, new_venue_website, new_venue_seekingTalent, new_venue_seekingDescription)
+    
+    db.session.add(new_venue)
+    db.session.commit()
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
 
   # on successful db insert, flash success
-  flash('Venue ' + request.form['name'] + ' was successfully listed!')
+    flash('Venue ' + request.form['name'] + ' was successfully listed!')
   # TODO: on unsuccessful db insert, flash an error instead.
+
+  except:
+    db.session.rollback()
+    flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+  
+  finally:
+    db.session.close()
+  
   # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
   return render_template('pages/home.html')
