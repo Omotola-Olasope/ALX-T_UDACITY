@@ -262,19 +262,21 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
+  new_venue = Venue()
+  new_venue_name = request.form['name']
+  new_venue_city = request.form['city']
+  new_venue_state = request.form['state']
+  new_venue_address = request.form['address']
+  new_venue_phone = request.form['phone']
+  new_venue_genres = request.form['genres']
+  new_venue_facebook_link = request.form['facebook_link']
+  new_venue_image_link = request.form['image_link']
+  new_venue_website = request.form['website']
+  new_venue_seekingTalent = request.form['seeking_talent']
+  new_venue_seekingDescription = request.form['seeking_description']
+  new_venue = Venue(new_venue_name, new_venue_city, new_venue_state, new_venue_address, new_venue_phone, new_venue_genres, new_venue_facebook_link, new_venue_image_link, new_venue_website, new_venue_seekingTalent, new_venue_seekingDescription)
+      
   try:
-    new_venue_name = request.form['name']
-    new_venue_city = request.form['city']
-    new_venue_state = request.form['state']
-    new_venue_address = request.form['address']
-    new_venue_phone = request.form['phone']
-    new_venue_genres = request.form['genres']
-    new_venue_facebook_link = request.form['facebook_link']
-    new_venue_image_link = request.form['image_link']
-    new_venue_website = request.form['website']
-    new_venue_seekingTalent = request.form['seeking_talent']
-    new_venue_seekingDescription = request.form['seeking_description']
-    new_venue = Venue(new_venue_name, new_venue_city, new_venue_state, new_venue_address, new_venue_phone, new_venue_genres, new_venue_facebook_link, new_venue_image_link, new_venue_website, new_venue_seekingTalent, new_venue_seekingDescription)
     
     db.session.add(new_venue)
     db.session.commit()
@@ -620,19 +622,21 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
-  try:
-    new_artist_name = request.form['name']
-    new_artist_city = request.form['city']
-    new_artist_state = request.form['state']
-    new_artist_phone = request.form['phone']
-    new_artist_genres = request.form['genres']
-    new_artist_facebook_link = request.form['facebook_link']
-    new_artist_image_link = request.form['image_link']
-    new_artist_website = request.form['website']
-    new_artist_seekingVenue = request.form['seeking_venue']
-    new_artist_seekingDescription = request.form['seeking_description']
-    new_artist = Artist(new_artist_name, new_artist_city, new_artist_state, new_artist_phone, new_artist_genres, new_artist_facebook_link, new_artist_image_link, new_artist_website, new_artist_seekingVenue, new_artist_seekingDescription)
+  new_artist = Artist()
+  new_artist_name = request.form['name']
+  new_artist_city = request.form['city']
+  new_artist_state = request.form['state']
+  new_artist_phone = request.form['phone']
+  new_artist_genres = request.form['genres']
+  new_artist_facebook_link = request.form['facebook_link']
+  new_artist_image_link = request.form['image_link']
+  new_artist_website = request.form['website']
+  new_artist_seekingVenue = request.form['seeking_venue']
+  new_artist_seekingDescription = request.form['seeking_description']
+  new_artist = Artist(new_artist_name, new_artist_city, new_artist_state, new_artist_phone, new_artist_genres, new_artist_facebook_link, new_artist_image_link, new_artist_website, new_artist_seekingVenue, new_artist_seekingDescription)
     
+
+  try:
     db.session.add(new_artist)
     db.session.commit()
   
