@@ -42,7 +42,7 @@ class Venue(db.Model):
     facebook_link = db.Column(db.String(120), nullable=False)
     image_link = db.Column(db.String(500), nullable=False)
     website = db.Column(db.String(), nullable=True)
-    seeking_talent = db.Column(db.Boolean)
+    seeking_talent = db.Column(db.String)
     seeking_describtion = db.Column(db.Text())
     shows = db.relationship('Show', backref='venue', lazy=True)
 
@@ -60,7 +60,7 @@ class Artist(db.Model):
     facebook_link = db.Column(db.String(120), nullable=False)
     image_link = db.Column(db.String(500), nullable=False)
     website = db.Column(db.String(), nullable=True)
-    seeking_venue = db.Column(db.Boolean)
+    seeking_venue = db.Column(db.String)
     seeking_describtion = db.Column(db.Text())
     shows = db.relationship('Show', backref='artist', lazy=True)
 
@@ -105,8 +105,8 @@ def index():
 
 @app.route('/venues')
 def venues():
-    num_upcoming_shows = db.session.query(Venue).join(Show).group_by(Venue.name, Show.id).order_by(Count(Show.id)).all()
-    venue = Venue.query.order_by(num_upcoming_shows).all()
+    num_upcoming_shows = db.session.query(Venue).join(Show).group_by(Venue.id, Venue.name, Show.id).all()
+    venue = Venue.query.all()
     return render_template('pages/venues.html', venue=venue)
     # TODO: replace with real venues data.
     #      num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
@@ -134,7 +134,7 @@ def venues():
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
   
-  search_term = request.form.get(venue.name)
+  search_term = request.form.get('search_term')
   venue_search = "%{}%".format(search_term)
   results = Venue.query.filter(Venue.name.ilike(venue_search)).all()
 
@@ -263,19 +263,18 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
   new_venue = Venue()
-  new_venue_name = request.form['name']
-  new_venue_city = request.form['city']
-  new_venue_state = request.form['state']
-  new_venue_address = request.form['address']
-  new_venue_phone = request.form['phone']
-  new_venue_genres = request.form['genres']
-  new_venue_facebook_link = request.form['facebook_link']
-  new_venue_image_link = request.form['image_link']
-  new_venue_website = request.form['website']
-  new_venue_seekingTalent = request.form['seeking_talent']
-  new_venue_seekingDescription = request.form['seeking_description']
-  new_venue = Venue(new_venue_name, new_venue_city, new_venue_state, new_venue_address, new_venue_phone, new_venue_genres, new_venue_facebook_link, new_venue_image_link, new_venue_website, new_venue_seekingTalent, new_venue_seekingDescription)
-      
+  new_venue.name = request.form['name']
+  new_venue.city = request.form['city']
+  new_venue.state = request.form['state']
+  new_venue.address = request.form['address']
+  new_venue.phone = request.form['phone']
+  new_venue.genres = request.form['genres']
+  new_venue.facebook_link = request.form['facebook_link']
+  new_venue.image_link = request.form['image_link']
+  new_venue.website = request.form['website_link']
+  new_venue.seeking_talent = request.form['seeking_talent']
+  new_venue.seeking_description = request.form['seeking_description']
+        
   try:
     
     db.session.add(new_venue)
@@ -342,7 +341,7 @@ def artists():
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
   
-  search_term = request.form.get(artist.name)
+  search_term = request.form.get('search_term')
   artist_search = "%{}%".format(search_term)
   results = Artist.query.filter(Artist.name.ilike(artist_search)).all()
 
@@ -623,17 +622,17 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
   new_artist = Artist()
-  new_artist_name = request.form['name']
-  new_artist_city = request.form['city']
-  new_artist_state = request.form['state']
-  new_artist_phone = request.form['phone']
-  new_artist_genres = request.form['genres']
-  new_artist_facebook_link = request.form['facebook_link']
-  new_artist_image_link = request.form['image_link']
-  new_artist_website = request.form['website']
-  new_artist_seekingVenue = request.form['seeking_venue']
-  new_artist_seekingDescription = request.form['seeking_description']
-  new_artist = Artist(new_artist_name, new_artist_city, new_artist_state, new_artist_phone, new_artist_genres, new_artist_facebook_link, new_artist_image_link, new_artist_website, new_artist_seekingVenue, new_artist_seekingDescription)
+  new_artist.name = request.form['name']
+  new_artist.city = request.form['city']
+  new_artist.state = request.form['state']
+  new_artist.phone = request.form['phone']
+  new_artist.genres = request.form['genres']
+  new_artist.facebook_link = request.form['facebook_link']
+  new_artist.image_link = request.form['image_link']
+  new_artist.website = request.form['website_link']
+  new_artist.seeking_venue = request.form['seeking_venue']
+  new_artist.seeking_description = request.form['seeking_description']
+ 
     
 
   try:
@@ -733,7 +732,7 @@ def create_show_submission():
     show_venueId = request.form['venue_id']
     show_startTime = request.form['start_time']
     
-    new_show = Show(show_artisId, show_venueId, show_startTime)
+    new_show = Show(show_artistId, show_venueId, show_startTime)
     
     db.session.add(new_show)
     db.session.commit()
