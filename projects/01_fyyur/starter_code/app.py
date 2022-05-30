@@ -33,7 +33,7 @@ collections.Callable = collections.abc.Callable
 #----------------------------------------------------------------------------#
 
 class Venue(db.Model):
-    __tablename__ = 'Venue'
+    __tablename__ = 'venues'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
@@ -45,14 +45,14 @@ class Venue(db.Model):
     facebook_link = db.Column(db.String(120), nullable=False)
     image_link = db.Column(db.String(500), nullable=False)
     website = db.Column(db.String(), nullable=True)
-    seeking_talent = db.Column(db.String, nullable=True)
+    seeking_talent = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.Text(), nullable=True)
     shows = db.relationship('Show', backref='venue', lazy=True)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 class Artist(db.Model):
-    __tablename__ = 'Artist'
+    __tablename__ = 'artists'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
@@ -63,7 +63,7 @@ class Artist(db.Model):
     facebook_link = db.Column(db.String(120), nullable=False)
     image_link = db.Column(db.String(500), nullable=False)
     website = db.Column(db.String(), nullable=True)
-    seeking_venue = db.Column(db.String, nullable=True)
+    seeking_venue = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.Text(), nullable=True)
     shows = db.relationship('Show', backref='artist', lazy=True)
 
@@ -72,7 +72,7 @@ class Artist(db.Model):
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
 class Show(db.Model):
-    __tablename__ = 'Show'
+    __tablename__ = 'shows'
 
     id = db.Column(db.Integer, primary_key=True)
     artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
@@ -108,10 +108,10 @@ def index():
 
 @app.route('/venues')
 def venues():
-  all_venues = db.session.query(Venue.city,Venue.state).group_by(Venue.state,Venue.city).all()
+  all_venues = db.session.query(venues.city,venues.state).group_by(venues.state,venues.city).all()
   data = []
   for area in all_venues:
-      venue_areas = Venue.query.filter_by(state=area.state).filter_by(city=area.city).all()
+      venue_areas = venues.query.filter_by(state=area.state).filter_by(city=area.city).all()
       venue_data = []
       for venue in venue_areas:
         venue_data.append({
@@ -132,7 +132,7 @@ def search_venues():
   
   search_term = request.form.get('search_term')
   venue_search = "%{}%".format(search_term)
-  searchResults = Venue.query.filter(Venue.name.ilike(venue_search)).all()
+  searchResults = venues.query.filter(venues.name.ilike(venue_search)).all()
 
   venueResult={
     "count": len(searchResults),
@@ -140,8 +140,8 @@ def search_venues():
   }
   for venue in searchResults:
     venueResult['data'].append({
-      "id": Venue.id,
-      "name": Venue.name,
+      "id": venues.id,
+      "name": venues.name,
       })
 
   # TODO: implement search on venues with partial string search. Ensure it is case-insensitive.
@@ -152,7 +152,7 @@ def search_venues():
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
-  givenVenue = Venue.query.get(venue_id)
+  givenVenue = venues.query.get(venue_id)
 
   data = {
     "id": givenVenue.id,
@@ -182,7 +182,7 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-  new_venue = Venue()
+  new_venue = venues()
   new_venue.name = request.form['name']
   new_venue.city = request.form['city']
   new_venue.state = request.form['state']
@@ -220,7 +220,7 @@ def create_venue_submission():
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
   try:
-    venue = Venue.query.get(venue_id)
+    venue = venues.query.get(venue_id)
     db.session.delete(venue)
     db.session.commit()
     
@@ -242,7 +242,7 @@ def delete_venue(venue_id):
 @app.route('/artists')
 def artists():
   
-  artist = Artist.query.order_by(Artist.id).all()
+  artist = artists.query.order_by(artists.id).all()
   
 
   # TODO: replace with real data returned from querying the database
@@ -254,7 +254,7 @@ def search_artists():
   
   search_term = request.form.get('search_term')
   artist_search = "%{}%".format(search_term)
-  searchResults = Artist.query.filter(Artist.name.ilike(artist_search)).all()
+  searchResults = artists.query.filter(artists.name.ilike(artist_search)).all()
 
   artistResult={
     "count": len(searchResults),
@@ -262,8 +262,8 @@ def search_artists():
   }
   for artist in searchResults:
     artistResult['data'].append({
-      "id": Artist.id,
-      "name": Artist.name,
+      "id": artists.id,
+      "name": artists.name,
       })
 
   # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
@@ -275,7 +275,7 @@ def search_artists():
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
 
-  givenArtist = Artist.query.get(artist_id)
+  givenArtist = artists.query.get(artist_id)
 
   data = {
     "id": givenArtist.id,
@@ -304,7 +304,7 @@ def show_artist(artist_id):
 def edit_artist(artist_id):
   form = ArtistForm()
   
-  artist = Artist.query.get(artist_id)
+  artist = artists.query.get(artist_id)
   form.name.data = artist.name
   form.city.data = artist.city
   form.state.data = artist.state
@@ -324,7 +324,7 @@ def edit_artist(artist_id):
 def edit_artist_submission(artist_id):
   # TODO: take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
-  artist = Artist.query.get(artist_id)
+  artist = artists.query.get(artist_id)
   
   name = request.form['name']
   city = request.form['city']
@@ -351,10 +351,10 @@ def edit_artist_submission(artist_id):
   try:
     db.session.add
     db.session.commit()
-    flash("Artist {} is updated successfully".format(Artist.name))
+    flash("Artist {} is updated successfully".format(artists.name))
   except:
     db.session.rollback()
-    flash("Artist {} isn't updated successfully".format(Artist.name))
+    flash("Artist {} isn't updated successfully".format(artists.name))
   finally:
     db.session.close()
   
@@ -364,7 +364,7 @@ def edit_artist_submission(artist_id):
 def edit_venue(venue_id):
   form = VenueForm()
   
-  venue = Venue.query.get(venue_id)
+  venue = venues.query.get(venue_id)
   
   form.name.data = venue.name
   form.city.data = venue.city
@@ -386,7 +386,7 @@ def edit_venue(venue_id):
 def edit_venue_submission(venue_id):
   # TODO: take values from the form submitted, and update existing
   # venue record with ID <venue_id> using the new attributes
-  venue = Venue.query.get(venue_id)
+  venue = venues.query.get(venue_id)
   
   name = request.form['name']
   city = request.form['city']
@@ -415,10 +415,10 @@ def edit_venue_submission(venue_id):
   try:
     db.session.add
     db.session.commit()
-    flash("Venue {} is updated successfully".format(Venue.name))
+    flash("Venue {} is updated successfully".format(venues.name))
   except:
     db.session.rollback()
-    flash("Venue {} isn't updated successfully".format(Venue.name))
+    flash("Venue {} isn't updated successfully".format(venues.name))
   finally:
     db.session.close()
   
@@ -434,7 +434,7 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
-  new_artist = Artist()
+  new_artist = artists()
   new_artist.name = request.form['name']
   new_artist.city = request.form['city']
   new_artist.state = request.form['state']
@@ -478,17 +478,17 @@ def create_artist_submission():
 @app.route('/shows')
 def shows():
   
-  Joins = db.session.query(Show).join(Venue).join(Artist).all()
+  Joins = db.session.query(shows).join(venues).join(artists).all()
   
   data = []
   for show in Joins: 
     data.append({
-      "venue_id": show.venue_id,
-      "venue_name": show.venue.name,
-      "artist_id": show.artist_id,
-      "artist_name": show.artist.name, 
-      "artist_image_link": show.artist.image_link,
-      "start_time": str(show.start_time)
+      "venue_id": shows.venue_id,
+      "venue_name": shows.venue.name,
+      "artist_id": shows.artist_id,
+      "artist_name": shows.artists.name, 
+      "artist_image_link": shows.artists.image_link,
+      "start_time": str(shows.start_time)
     })
 
   # displays list of shows at /shows
@@ -506,7 +506,7 @@ def create_shows():
 def create_show_submission():
   
   try:
-    newShow = Show()
+    newShow = shows()
     newShow.artist_id = request.form['artist_id']
     newShow.venue_id = request.form['venue_id']
     newShow.start_time = request.form['start_time']
