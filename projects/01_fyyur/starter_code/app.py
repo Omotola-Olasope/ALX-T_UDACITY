@@ -47,7 +47,7 @@ class Venue(db.Model):
     website = db.Column(db.String(), nullable=True)
     seeking_talent = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.Text(), nullable=True)
-    shows = db.relationship('Show', backref='venue', lazy=True)
+    shows = db.relationship('shows', cascade='all, delete-orphan', backref='venue', lazy=True)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -65,7 +65,7 @@ class Artist(db.Model):
     website = db.Column(db.String(), nullable=True)
     seeking_venue = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.Text(), nullable=True)
-    shows = db.relationship('Show', backref='artist', lazy=True)
+    shows = db.relationship('shows', cascade='all, delete-orphan', backref='artist', lazy=True)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -75,8 +75,8 @@ class Show(db.Model):
     __tablename__ = 'shows'
 
     id = db.Column(db.Integer, primary_key=True)
-    artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
-    venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
+    artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'), nullable=False)
+    venue_id = db.Column(db.Integer, db.ForeignKey('venues.id'), nullable=False)
     start_time = db.Column(db.DateTime, nullable=False)
 
 
