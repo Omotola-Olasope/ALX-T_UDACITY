@@ -188,12 +188,12 @@ def create_venue_submission():
   new_venue.state = request.form['state']
   new_venue.address = request.form['address']
   new_venue.phone = request.form['phone']
-  new_venue.genres = request.form['genres']
+  new_venue.genres = request.form['genres'].split(',')
   new_venue.facebook_link = request.form['facebook_link']
   new_venue.image_link = request.form['image_link']
   new_venue.website = request.form['website_link']
-  new_venue.seeking_talent = request.form['seeking_talent']
-  new_venue.seeking_description = request.form['seeking_description']
+  #new_venue.seeking_talent = request.form['seeking_talent']
+  #new_venue.seeking_description = request.form['seeking_description']
         
   try:
     
